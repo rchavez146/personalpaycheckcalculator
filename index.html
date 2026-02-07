@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Finance Pro | Rodrigo's Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #4F46E5; --primary-light: #EEF2FF; --secondary: #10B981; 
+            --bg: #F3F4F6; --card: #FFFFFF; --text: #1F2937; --text-light: #6B7280; --border: #E5E7EB; 
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 600px; background: var(--card); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid var(--border); }
+        
+        .tabs { display: flex; background: #F9FAFB; padding: 8px 8px 0 8px; border-bottom: 1px solid var(--border); }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 12px 12px 0 0; transition: 0.3s; }
+        .tab-btn.active { color: var(--primary); background: white; border: 1px solid var(--border); border-bottom: 2px solid white; margin-bottom: -1px; }
+
+        .content { padding: 1.5rem; display: none; }
+        .content.active { display: block; }
+
+        .check-card { background: #F9FAFB; padding: 1.2rem; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 1rem; }
+        h3 { font-size: 0.85rem; margin: 0 0 1rem 0; color: var(--primary); font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-light); }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; box-sizing: border-box; transition: 0.2s; background: white; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; margin-top: 1rem; }
+        .btn-outline { background: white; border: 2px dashed var(--border); color: var(--text-light); margin-top: 1rem; }
+        .btn-reset-small { background: #E5E7EB; color: #4B5563; padding: 4px 8px; font-size: 0.65rem; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-add { background: var(--primary-light); color: var(--primary); border: 1px dashed var(--primary); margin-top: 15px; }
+
+        .summary-banner { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, var(--primary-light) 0%, #E0E7FF 100%); border-radius: 16px; margin-bottom: 1.5rem; display: flex; justify-content: space-around; border: 1px solid #C7D2FE; }
+        .stat-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+
+        .mode-toggle { display: flex; background: #E5E7EB; border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; }
+        .mode-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: var(--text-light); background: transparent; }
+        .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .dynamic-row { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: grid; grid-template-columns: 95px 1fr 100px 30px; gap: 8px; align-items: center; }
+        .btn-del { color: #DC2626; background: none; border: none; cursor: pointer; font-weight: 800; font-size: 1.2rem; }
+        
+        .tax-breakdown { font-size: 0.95rem; color: #4B5563; margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--border); }
+        .tax-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .tax-total { font-weight: 800; color: var(--primary); margin-top: 8px; font-size: 1.15rem; border-top: 1px solid #D1D5DB; padding-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" id="tabPay">Paychecks</button>
+        <button class="tab-btn" id="tabBudget">Budget</button>
+    </div>
+
+    <div id="pay-calc" class="content active">
+        <div id="check1" class="check-card">
+            <h3>Check #1 <button class="btn-reset-small" onclick="resetCheck(1)">↺ Reset</button></h3>
+            <div class="row">
+                <div class="input-group"><label>Rate/Hr</label><input type="number" id="rate1" value="21"></div>
+                <div class="input-group"><label>Reg Hours</label><input type="number" id="hrs1" value="80"></div>
+            </div>
+            <div class="row">
+                <div class="input-group"><label>OT Hours</label><input type="number" id="ot1" value="0"></div>
+                <div class="input-group"><label>Bilingual/Bonus</label><input type="number" id="bonus1" value="250"></div>
+            </div>
+            <div class="row">
+                <div class="input-group"><label>401k %</label><input type="number" id="k1" value="6"></div>
+                <div class="input-group"><label>Benefits $</label><input type="number" id="b1" value="35"></div>
+            </div>
+            <div class="tax-breakdown" id="breakdown1"></div>
+        </div>
+
+        <div id="check2" class="check-card" style="display:none;">
+            <h3>Check #2 <button class="btn-reset-small" onclick="resetCheck(2)">↺ Reset</button> <button onclick="removeCheck2()" style="color:red; background:none; border:none; cursor:pointer; font-size:0.7rem;">[Remove]</button></h3>
+            <div class="row">
+                <div class="input-group"><label>Rate/Hr</label><input type="number" id="rate2" value="21"></div>
+                <div class="input-group"><label>Reg Hours</label><input type="number" id="hrs2" value="80"></div>
+            </div>
+            <div class="row">
+                <div class="input-group"><label>OT Hours</label><input type="number" id="ot2" value="0"></div>
+                <div class="input-group"><label>Bilingual/Bonus</label><input type="number" id="bonus2" value="250"></div>
+            </div>
+            <div class="row">
+                <div class="input-group"><label>401k %</label><input type="number" id="k2" value="6"></div>
+                <div class="input-group"><label>Benefits $</label><input type="number" id="b2" value="35"></div>
+            </div>
+            <div class="tax-breakdown" id="breakdown2"></div>
+        </div>
+
+        <button id="addCheckBtn" class="btn btn-outline">+ Add Second Check</button>
+        <button class="btn btn-primary" id="syncBtn">Sync & Display Taxes</button>
+    </div>
+
+    <div id="budget-calc" class="content">
+        <div class="mode-toggle">
+            <button id="biBtn" class="mode-btn active">Biweekly</button>
+            <button id="moBtn" class="mode-btn">Monthly</button>
+        </div>
+        <div class="summary-banner">
+            <div><div class="stat-label" id="incLabel">Income</div><div class="stat-val" id="totalIncDisp">$0.00</div></div>
+            <div><div class="stat-label">Remaining</div><div class="stat-val" id="remainingDisp">$0.00</div></div>
+        </div>
+        <div class="input-group"><label id="billLabel">Bills</label><input type="number" id="bBills" value="550"></div>
+        <div class="input-group"><label id="spendLabel">Spending</label><input type="number" id="bSpend" value="150"></div>
+        <div class="row">
+            <div class="input-group"><label>To Savings</label><input type="number" id="bSave" value="0"></div>
+            <div class="input-group"><label>To Debt</label><input type="number" id="bInvest" value="0"></div>
+        </div>
+
+        <div id="dynamicCategories"></div>
+        <button class="btn btn-add" id="addCategoryBtn">+ Add Income or Expense Row</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let check2Active = false;
+    let totalIncome = 0;
+
+    // Helper: Safe formatting with commas
+    const fmt = (num) => {
+        if (isNaN(num)) return "0.00";
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const getTaxInfo = (p) => {
+        const r = parseFloat(document.getElementById('rate'+p).value)||0, 
+              h = parseFloat(document.getElementById('hrs'+p).value)||0,
+              o = parseFloat(document.getElementById('ot'+p).value)||0,
+              bn = parseFloat(document.getElementById('bonus'+p).value)||0,
+              k = parseFloat(document.getElementById('k'+p).value)||0,
+              b = parseFloat(document.getElementById('b'+p).value)||0;
+        const gross = (r * h) + (o * r * 1.5) + bn;
+        const kAmt = gross * (k/100);
+        const ss = gross * 0.062, med = gross * 0.0145;
+        const taxable = Math.max(0, ((gross - kAmt - b) * 26) - 16100);
+        const fed = (taxable > 50400 ? (taxable - 50400) * 0.22 + 5800 : (taxable - 12400) * 0.12 + 1240) / 26;
+        const state = (taxable * 0.043) / 26;
+        const net = gross - kAmt - b - ss - med - fed - state;
+        return { gross, kAmt, b, ss, med, fed, state, net };
+    };
+
+    const updateDisplay = (p, d) => {
+        const container = document.getElementById('breakdown'+p);
+        if(!container) return;
+        container.innerHTML = `
+            <div class="tax-row"><span>Gross Pay:</span><span>$${fmt(d.gross)}</span></div>
+            <div class="tax-row"><span>401k/Benefits:</span><span>-$${fmt(d.kAmt + d.b)}</span></div>
+            <div class="tax-row"><span>SS/Medicare:</span><span>-$${fmt(d.ss + d.med)}</span></div>
+            <div class="tax-row"><span>Fed Tax (FITW):</span><span>-$${fmt(d.fed)}</span></div>
+            <div class="tax-row"><span>NM State Tax:</span><span>-$${fmt(d.state)}</span></div>
+            <div class="tax-row tax-total"><span>Net Take-Home:</span><span>$${fmt(d.net)}</span></div>
+        `;
+    };
+
+    const updateBudgetUI = () => {
+        const b = parseFloat(document.getElementById('bBills').value)||0,
+              s = parseFloat(document.getElementById('bSpend').value)||0,
+              sv = parseFloat(document.getElementById('bSave').value)||0,
+              db = parseFloat(document.getElementById('bInvest').value)||0;
+        
+        let dynamicAdj = 0;
+        document.querySelectorAll('.dyn-row').forEach(row => {
+            const select = row.querySelector('.dyn-type');
+            const val = parseFloat(row.querySelector('.dyn-val').value)||0;
+            if(select.value === 'income') {
+                select.style.color = '#10B981';
+                dynamicAdj += val;
+            } else {
+                select.style.color = '#EF4444';
+                dynamicAdj -= val;
+            }
+        });
+
+        const finalRem = totalIncome + dynamicAdj - b - s - sv - db;
+        const disp = document.getElementById('remainingDisp');
+        if(disp) {
+            disp.innerText = `$${fmt(finalRem)}`;
+            disp.style.color = finalRem < 0 ? "#EF4444" : "#4F46E5";
+        }
+    };
+
+    window.resetCheck = (p) => {
+        ['rate'+p, 'hrs'+p, 'ot'+p, 'bonus'+p, 'k'+p, 'b'+p].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = 0;
+        });
+        const breakdown = document.getElementById('breakdown'+p);
+        if(breakdown) breakdown.innerHTML = '';
+        syncCalc();
+    };
+
+    document.getElementById('addCategoryBtn').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'dynamic-row dyn-row';
+        div.innerHTML = `
+            <select class="dyn-type" style="color:#EF4444; font-weight:700;">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+            </select>
+            <input type="text" placeholder="Name">
+            <input type="number" class="dyn-val" placeholder="0.00">
+            <button class="btn-del">×</button>
+        `;
+        document.getElementById('dynamicCategories').appendChild(div);
+        const sel = div.querySelector('.dyn-type'), 
+              inp = div.querySelector('.dyn-val'), 
+              del = div.querySelector('.btn-del');
+        
+        [sel, inp].forEach(el => el.addEventListener('input', updateBudgetUI));
+        del.addEventListener('click', () => { div.remove(); updateBudgetUI(); });
+        updateBudgetUI();
+    });
+
+    const syncCalc = () => {
+        const d1 = getTaxInfo('1'); updateDisplay('1', d1); totalIncome = d1.net;
+        if (check2Active) { 
+            const d2 = getTaxInfo('2'); updateDisplay('2', d2); 
+            totalIncome += d2.net; 
+        }
+        document.getElementById('totalIncDisp').innerText = `$${fmt(totalIncome)}`;
+        updateBudgetUI();
+    };
+
+    document.getElementById('syncBtn').addEventListener('click', syncCalc);
+
+    // Tab Logic + Intelligent Mode Select
+    document.getElementById('tabPay').addEventListener('click', () => {
+        document.getElementById('pay-calc').classList.add('active'); 
+        document.getElementById('budget-calc').classList.remove('active');
+        document.getElementById('tabPay').classList.add('active'); 
+        document.getElementById('tabBudget').classList.remove('active');
+    });
+    
+    document.getElementById('tabBudget').addEventListener('click', () => {
+        document.getElementById('budget-calc').classList.add('active'); 
+        document.getElementById('pay-calc').classList.remove('active');
+        document.getElementById('tabBudget').classList.add('active'); 
+        document.getElementById('tabPay').classList.remove('active');
+        if(check2Active) setMode('monthly');
+    });
+
+    document.getElementById('addCheckBtn').addEventListener('click', () => { 
+        check2Active = true; 
+        document.getElementById('check2').style.display = 'block'; 
+        document.getElementById('addCheckBtn').style.display = 'none'; 
+    });
+    
+    window.removeCheck2 = () => { 
+        check2Active = false; 
+        document.getElementById('check2').style.display = 'none'; 
+        document.getElementById('addCheckBtn').style.display = 'block'; 
+        syncCalc();
+        setMode('biweekly');
+    };
+
+    const setMode = (m) => {
+        const mult = m === 'monthly' ? 1 : 0.5;
+        document.getElementById('biBtn').classList.toggle('active', m === 'biweekly');
+        document.getElementById('moBtn').classList.toggle('active', m === 'monthly');
+        document.getElementById('billLabel').innerText = `Bills ($${(1100 * mult).toFixed(0)})`;
+        document.getElementById('spendLabel').innerText = `Spending ($${(300 * mult).toFixed(0)})`;
+        document.getElementById('bBills').value = (1100 * mult).toFixed(0);
+        document.getElementById('bSpend').value = (300 * mult).toFixed(0);
+        updateBudgetUI();
+    };
+
+    document.getElementById('biBtn').addEventListener('click', () => setMode('biweekly'));
+    document.getElementById('moBtn').addEventListener('click', () => setMode('monthly'));
+    ['bBills', 'bSpend', 'bSave', 'bInvest'].forEach(id => document.getElementById(id).addEventListener('input', updateBudgetUI));
+
+    setMode('biweekly');
+});
+</script>
+</body>
+</html>
